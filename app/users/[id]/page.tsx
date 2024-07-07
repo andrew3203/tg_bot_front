@@ -2,16 +2,23 @@
 
 import { ChevronLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Option } from "@/components/ui/multiple-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function UserEdit() {
-  const params = useParams();
+  const { id } = useParams();
   const router = useRouter();
 
   const [value, setValue] = useState<Option[]>([]);
@@ -23,6 +30,144 @@ export default function UserEdit() {
   const [rating, setRating] = useState<number>(0);
   const [turnover, setTurnover] = useState<number>(0);
   const [orderCount, setOrderCount] = useState<number>(0);
+  const [cashback, setCashback] = useState<number>(0);
+  const [goldenTickets, setGoldenTickets] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
+  const [group, setGroup] = useState("");
+  const [groupNames, setGroupNames] = useState([]);
+
+  const fetchGroups = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No token found in localStorage");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://bot-api.portobello.ru/group/names/list`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            token: token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch groups");
+      }
+
+      const result = await response.json();
+      setGroupNames(result || []);
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+    }
+  };
+
+  const fetchUser = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No token found in localStorage");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://bot-api.portobello.ru/user?user_id=${id}`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            token: token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user");
+      }
+
+      const result = await response.json();
+      if (result) {
+        setGroup(result.group_id);
+        setName(result.firstname);
+        setSurname(result.lastname);
+        setPatronymic(result.patronymic);
+        setCode(result.portobello_id);
+        setCompany(result.company);
+        setRating(result.rating);
+        setTurnover(result.turnover);
+        setOrderCount(result.orders_amount);
+        setCashback(result.cashback_amount);
+        setGoldenTickets(result.golden_tickets_amount);
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+    fetchUser();
+  }, []);
+
+  const handleSave = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No token found in localStorage");
+      return;
+    }
+
+    const body = {
+      id,
+      group_id: group,
+      firstname: name,
+      lastname: surname,
+      portobello_id: code,
+      company,
+      rating,
+      turnover,
+      orders_amount: orderCount,
+      cashback_amount: cashback,
+      golden_tickets_amount: goldenTickets,
+    };
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `https://bot-api.portobello.ru/user?user_id=${id}`,
+        {
+          method: "PUT",
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+            token: token,
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to save user");
+      }
+
+      const result = await response.json();
+
+      if (result) {
+        router.push("/users");
+      }
+    } catch (error) {
+      console.error("Error saving user:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="mx-auto mt-24 flex min-h-screen max-w-[1440px] p-6">
@@ -36,7 +181,7 @@ export default function UserEdit() {
             Назад
           </span>
         </div>
-        <div className="mb-6 flex w-full items-center justify-between border-b-4 border-blue-300 py-6">
+        <div className="flex w-full items-center justify-between border-b-4 border-blue-300 py-6">
           <h3 className="text-2xl">
             {surname} {name} {patronymic}
           </h3>
@@ -50,7 +195,7 @@ export default function UserEdit() {
           </div>
         </div>
 
-        <div className="mb-4 flex w-full items-center gap-2">
+        <div className="mb-4 mt-6 flex w-full items-center gap-2">
           <div className="flex w-full flex-col space-y-1.5">
             <Label htmlFor="name">Имя</Label>
             <Input
@@ -81,6 +226,29 @@ export default function UserEdit() {
         </div>
 
         <div className="mb-4 flex w-full items-center gap-2">
+          <div className="flex w-fit items-center gap-2">
+            <div className="flex w-fit flex-col space-y-1.5">
+              <Label htmlFor="group">Группа</Label>
+
+              <Select
+                onValueChange={(value) => setGroup(value)}
+                defaultValue={`${group}`}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Выберите группу" />
+                </SelectTrigger>
+                <SelectContent>
+                  {groupNames.map((group: any) => {
+                    return (
+                      <SelectItem key={group.key} value={`${group.key}`}>
+                        {group.value}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="flex w-full flex-col space-y-1.5">
             <Label htmlFor="code">Внутренний код</Label>
             <Input
@@ -131,8 +299,31 @@ export default function UserEdit() {
           </div>
         </div>
 
+        <div className="mb-4 flex w-full items-center gap-2">
+          <div className="flex w-full flex-col space-y-1.5">
+            <Label htmlFor="cashback">Кэшбэк</Label>
+            <Input
+              id="cashback"
+              placeholder="Введите Кэшбэк"
+              value={cashback}
+              onChange={(e) => setCashback(+e.target.value)}
+            />
+          </div>
+          <div className="flex w-full flex-col space-y-1.5">
+            <Label htmlFor="goldenTickets">Золотые билеты</Label>
+            <Input
+              id="goldenTickets"
+              placeholder="Введите Золотые билеты"
+              value={goldenTickets}
+              onChange={(e) => setGoldenTickets(+e.target.value)}
+            />
+          </div>
+        </div>
+
         <div className="flex w-full items-center justify-end">
-          <Button>Сохранить</Button>
+          <Button onClick={handleSave} disabled={loading}>
+            {loading ? "Сохранение..." : "Сохранить"}
+          </Button>
         </div>
       </div>
     </main>

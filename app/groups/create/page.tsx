@@ -182,7 +182,7 @@ export default function GroupCreate() {
 
         <div className="flex w-full items-center justify-end">
           <Button onClick={handleSave} disabled={loading}>
-            {loading ? "Сохранение..." : "Сохранить"}
+            {loading ? "Создание..." : "Создать"}
           </Button>
         </div>
       </div>

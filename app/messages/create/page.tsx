@@ -367,7 +367,9 @@ export default function MessageCreate() {
         </div>
 
         <div className="flex w-full items-center justify-end">
-          <Button onClick={handleSave}>Сохранить</Button>
+          <Button onClick={handleSave}>
+            {loading ? "Создание..." : "Создать"}
+          </Button>
         </div>
       </div>
     </main>

@@ -230,7 +230,7 @@ export default function Messages() {
       const result = await response.json();
 
       setData(result.data || []);
-      setTotalPages(result.totalPages || 1);
+      setTotalPages(result.count <= 10 ? 1 : Math.ceil(result.count / 10));
     } catch (error) {
       console.error("Error fetching messages:", error);
     } finally {

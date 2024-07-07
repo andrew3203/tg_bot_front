@@ -12,9 +12,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import dayjs from "dayjs";
+import { CirclePlus, MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,7 +29,6 @@ import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -43,135 +43,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { User } from "@/types/user";
-
-const data = [
-  {
-    id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@yahoo.com",
-    firstName: "Ken",
-    lastName: "Williams",
-    internalCode: "KV001",
-    company: "Tech Solutions",
-    rating: 4.7,
-    turnover: 15000,
-    orderCount: 10,
-    creationDate: "2023-01-15",
-    updateDate: "2023-06-10",
-  },
-  {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@gmail.com",
-    firstName: "Abe",
-    lastName: "Johnson",
-    internalCode: "AJ002",
-    company: "Innovate LLC",
-    rating: 4.5,
-    turnover: 12000,
-    orderCount: 8,
-    creationDate: "2023-02-20",
-    updateDate: "2023-05-18",
-  },
-  {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@gmail.com",
-    firstName: "Monserrat",
-    lastName: "Garcia",
-    internalCode: "MG003",
-    company: "Creative Inc",
-    rating: 4.9,
-    turnover: 20000,
-    orderCount: 15,
-    creationDate: "2023-03-12",
-    updateDate: "2023-06-05",
-  },
-  {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@gmail.com",
-    firstName: "Silas",
-    lastName: "Brown",
-    internalCode: "SB004",
-    company: "Enterprise Corp",
-    rating: 4.6,
-    turnover: 18000,
-    orderCount: 12,
-    creationDate: "2023-04-01",
-    updateDate: "2023-06-15",
-  },
-  {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@hotmail.com",
-    firstName: "Carmella",
-    lastName: "Martinez",
-    internalCode: "CM005",
-    company: "Retailers Ltd",
-    rating: 4.2,
-    turnover: 10000,
-    orderCount: 6,
-    creationDate: "2023-01-25",
-    updateDate: "2023-05-30",
-  },
-  {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@hotmail.com",
-    firstName: "Carmella",
-    lastName: "Martinez",
-    internalCode: "CM005",
-    company: "Retailers Ltd",
-    rating: 4.2,
-    turnover: 10000,
-    orderCount: 6,
-    creationDate: "2023-01-25",
-    updateDate: "2023-05-30",
-  },
-  {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@hotmail.com",
-    firstName: "Carmella",
-    lastName: "Martinez",
-    internalCode: "CM005",
-    company: "Retailers Ltd",
-    rating: 4.2,
-    turnover: 10000,
-    orderCount: 6,
-    creationDate: "2023-01-25",
-    updateDate: "2023-05-30",
-  },
-];
-
-const ActionMenu: React.FC<{ url: string }> = ({ url }) => {
-  const router = useRouter();
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => router.push(url)}>
-          Редактировать
-        </DropdownMenuItem>
-        <DropdownMenuItem>Удалить</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
 
 const columns: ColumnDef<User>[] = [
   {
@@ -197,101 +68,188 @@ const columns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
-    id: "id",
+    accessorKey: "id",
     header: "ID",
-    cell: ({ row }) => {
-      return <div className="capitalize">{row.original.id}</div>;
-    },
+    cell: ({ row }) => <div>{row.getValue("id")}</div>,
   },
   {
-    accessorKey: "firstName",
+    accessorKey: "firstname",
     header: "Имя",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("firstName")}</div>
-    ),
+    cell: ({ row }) => <div>{row.getValue("firstname")}</div>,
   },
   {
-    accessorKey: "lastName",
+    accessorKey: "lastname",
     header: "Фамилия",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("lastName")}</div>
-    ),
+    cell: ({ row }) => <div>{row.getValue("lastname")}</div>,
   },
   {
-    accessorKey: "internalCode",
-    header: "Внутренний код",
-    cell: ({ row }) => (
-      <div className="uppercase">{row.getValue("internalCode")}</div>
-    ),
+    accessorKey: "portobello_id",
+    header: "Внутренный код",
+    cell: ({ row }) => <div>{row.getValue("portobello_id")}</div>,
   },
   {
     accessorKey: "company",
     header: "Компания",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("company")}</div>
-    ),
+    cell: ({ row }) => <div>{row.getValue("company")}</div>,
   },
   {
     accessorKey: "rating",
-    header: () => <div className="text-center">Рейтинг</div>,
-    cell: ({ row }) => {
-      const rating: number = row.getValue("rating");
-
-      return <div className="text-center font-medium">{rating.toFixed(1)}</div>;
-    },
+    header: "Рейтинг",
+    cell: ({ row }) => <div>{row.getValue("rating")}</div>,
   },
   {
     accessorKey: "turnover",
-    header: () => <div className="text-right">Оборот</div>,
-    cell: ({ row }) => {
-      const turnover = parseFloat(row.getValue("turnover"));
-
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(turnover);
-
-      return <div className="text-right font-medium">{formatted}</div>;
-    },
+    header: "Оборот",
+    cell: ({ row }) => <div>{row.getValue("turnover")}</div>,
   },
   {
-    accessorKey: "orderCount",
-    header: () => <div className="text-center">Кол-во заказов</div>,
-    cell: ({ row }) => {
-      const orderCount: number = row.getValue("orderCount");
-
-      return <div className="text-center font-medium">{orderCount}</div>;
-    },
+    accessorKey: "orders_amount",
+    header: "Количество заказов",
+    cell: ({ row }) => <div>{row.getValue("orders_amount")}</div>,
   },
+  // {
+  //   accessorKey: "cashback_amount",
+  //   header: "Сумма кэшбэка",
+  //   cell: ({ row }) => <div>{row.getValue("cashback_amount")}</div>,
+  // },
+  // {
+  //   accessorKey: "golden_tickets_amount",
+  //   header: "Количество золотых билетов",
+  //   cell: ({ row }) => <div>{row.getValue("golden_tickets_amount")}</div>,
+  // },
   {
-    accessorKey: "creationDate",
+    accessorKey: "created_at",
     header: "Дата создания",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("creationDate")}</div>
-    ),
+    cell: ({ row }) => {
+      const creationDate: Date = row.getValue("created_at");
+      return (
+        <div className="capitalize">
+          {creationDate ? dayjs(creationDate).format("DD.MM.YYYY") : "-"}
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "updateDate",
+    accessorKey: "updated_at",
     header: "Дата обновления",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("updateDate")}</div>
-    ),
+    cell: ({ row }) => {
+      const updateDate: Date = row.getValue("updated_at");
+      return (
+        <div className="capitalize">
+          {updateDate ? dayjs(updateDate).format("DD.MM.YYYY") : "-"}
+        </div>
+      );
+    },
   },
   {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => <ActionMenu url={`/users/${row.original.id}`} />,
+    cell: ({ row }) => (
+      <ActionMenu id={row.getValue("id")} url={`/users/${row.original.id}`} />
+    ),
   },
 ];
 
-export default function Users() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+const ActionMenu: React.FC<{ id: number; url: string }> = ({ id, url }) => {
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No token found in localStorage");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://bot-api.portobello.ru/user?user_id=${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            accept: "application/json",
+            token: token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to save");
+      }
+
+      location.reload();
+    } catch (error) {
+      console.error("Error saving user:", error);
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => router.push(url)}>
+          Редактировать
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleDelete}>Удалить</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+};
+
+export default function Users() {
+  const router = useRouter();
+
+  const [data, setData] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  const fetchUsers = async (pageNumber: number) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found in localStorage");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://bot-api.portobello.ru/user/list?page_number=${pageNumber}&page_limit=10`,
+        {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            token: token,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+
+      const result = await response.json();
+
+      setData(result.data || []);
+      setTotalPages(result.count <= 10 ? 1 : Math.ceil(result.count / 10));
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers(page);
+  }, [page]);
 
   const table = useReactTable({
     data,
@@ -312,20 +270,30 @@ export default function Users() {
     },
   });
 
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
   return (
     <div className="mx-auto mt-24 w-full max-w-[1440px] px-6">
       <div className="flex items-center justify-between py-4">
-        <h3>Пользователи</h3>
-        <Input
-          placeholder="Поиск"
-          value={
-            (table.getColumn("firstName")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("firstName")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+        <h3>Сообщения</h3>
+        <div className="flex items-center gap-4">
+          <Input
+            placeholder="Поиск"
+            value={
+              (table.getColumn("firstname")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("firstname")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+          <CirclePlus
+            className="h-10 w-10 cursor-pointer"
+            onClick={() => router.push("users/create")}
+          />
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -348,33 +316,32 @@ export default function Users() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => {
-                return (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
+                <TableCell colSpan={columns.length} className="text-center">
+                  No messages found
                 </TableCell>
               </TableRow>
             )}
@@ -383,44 +350,38 @@ export default function Users() {
       </div>
       <Pagination className="my-4">
         <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
-          </PaginationItem>
+          <PaginationPrevious
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (page > 1) handlePageChange(page - 1);
+            }}
+            // disabled={page === 1}
+          />
+          {[...Array(totalPages)].map((_, i) => (
+            <PaginationItem key={i}>
+              <PaginationLink
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePageChange(i + 1);
+                }}
+                isActive={i + 1 === page}
+              >
+                {i + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+          <PaginationNext
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              if (page < totalPages) handlePageChange(page + 1);
+            }}
+            // disabled={page === totalPages}
+          />
         </PaginationContent>
       </Pagination>
-      {/*<div className="flex items-center justify-end space-x-2 py-4">*/}
-      {/*    <div className="flex-1 text-sm text-muted-foreground">*/}
-      {/*        {table.getFilteredSelectedRowModel().rows.length} of{" "}*/}
-      {/*        {table.getFilteredRowModel().rows.length} row(s) selected.*/}
-      {/*    </div>*/}
-      {/*    <div className="space-x-2">*/}
-      {/*        <Button*/}
-      {/*            variant="outline"*/}
-      {/*            size="sm"*/}
-      {/*            onClick={() => table.previousPage()}*/}
-      {/*            disabled={!table.getCanPreviousPage()}*/}
-      {/*        >*/}
-      {/*            Previous*/}
-      {/*        </Button>*/}
-      {/*        <Button*/}
-      {/*            variant="outline"*/}
-      {/*            size="sm"*/}
-      {/*            onClick={() => table.nextPage()}*/}
-      {/*            disabled={!table.getCanNextPage()}*/}
-      {/*        >*/}
-      {/*            Next*/}
-      {/*        </Button>*/}
-      {/*    </div>*/}
-      {/*</div>*/}
     </div>
   );
 }
